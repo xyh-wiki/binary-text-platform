@@ -1,45 +1,41 @@
 # Author:XYH Date:2025-11-15
-# Description: Spring Boot 后端多阶段构建 + 轻量级 JRE 运行（binary-text-backend）
+# Description: Binary Text Backend 多阶段构建（backend 多模块）
 
 ########################
-# 第 1 阶段：使用 Maven 编译多模块项目
+# 第 1 阶段：Maven 构建
 ########################
-FROM maven:3.9-eclipse-temurin-8 AS builder
+FROM maven:3.9.9-eclipse-temurin-8 AS builder
 
 WORKDIR /app
 
-# ================================
-# 1. 预拷贝 POM，利用 Maven 缓存
-# ================================
-COPY backend/pom.xml ./backend/pom.xml
-COPY backend/extract-binary-text-core/pom.xml ./backend/extract-binary-text-core/pom.xml
-COPY backend/binary-text-backend/pom.xml ./backend/binary-text-backend/pom.xml
+# 先拷贝后端父 POM 和各子模块 POM，利用依赖缓存
+COPY backend/pom.xml backend/pom.xml
+COPY backend/extract-binary-text-core/pom.xml backend/extract-binary-text-core/pom.xml
+COPY backend/binary-text-backend/pom.xml backend/binary-text-backend/pom.xml
 
-# 预拉取依赖，加速后续构建
+# 预下载依赖（离线构建更快）
 RUN mvn -f backend/pom.xml -pl binary-text-backend -am dependency:go-offline -DskipTests
 
-# ================================
-# 2. 拷贝全部后端源码并打包
-# ================================
-COPY backend ./backend
-# backend modules already copied via backend/
+# 再拷贝完整源码
+COPY backend backend
 
-# 构建后端（会自动构建 extract-binary-text）
-RUN mvn -pl binary-text-backend -am clean package -DskipTests
+# 真正打包：会构建 extract-binary-text-core 与 binary-text-backend
+RUN mvn -f backend/pom.xml -pl binary-text-backend -am clean package -DskipTests
 
 ########################
-# 第 2 阶段：使用轻量 JRE 运行 Spring Boot
+# 第 2 阶段：运行镜像（JRE）
 ########################
-FROM eclipse-temurin:8-jre
+FROM eclipse-temurin:8-jre-alpine
 
 WORKDIR /app
 
-# 从构建阶段复制 JAR
-COPY --from=builder /app/backend/binary-text-backend/target/binary-text-backend-1.0.0.jar /app/app.jar
-
-# JVM 参数可从 Dokploy 注入
-ENV JAVA_OPTS=""
+# 拷贝构建好的后端 jar 到运行镜像
+# 如果你版本号是 1.0.0，可以写死；这里用通配更稳妥
+COPY --from=builder /app/backend/binary-text-backend/target/*.jar /app/app.jar
 
 EXPOSE 8080
 
-CMD ["sh", "-c", "java $JAVA_OPTS -jar /app/app.jar"]
+ENV JAVA_OPTS=""
+
+# 启动 Spring Boot
+ENTRYPOINT ["sh", "-c", "java $JAVA_OPTS -jar /app/app.jar"]
