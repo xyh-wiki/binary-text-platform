@@ -176,6 +176,8 @@ const App = () => {
     }
 
     return (
+
+        // 外层
         <div
             style={{
                 minHeight: '100vh',
@@ -184,16 +186,15 @@ const App = () => {
                     '-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Helvetica,Arial,sans-serif',
                 background: '#0f172a',
                 color: '#e5e7eb',
-                display: 'flex',
-                justifyContent: 'center',
-                alignItems: 'flex-start',
                 padding: '40px 16px',
+                width: '100%',
             }}
         >
+
             <div
                 style={{
                     width: '100%',
-                    maxWidth: 960,
+                    maxWidth: '100%',
                     background: '#020617',
                     borderRadius: 24,
                     boxShadow: '0 24px 60px rgba(15,23,42,0.8)',
