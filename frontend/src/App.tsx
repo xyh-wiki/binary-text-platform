@@ -16,8 +16,16 @@ type FileTask = {
     result?: ExtractResult
 }
 
-// 后端 API 基础地址，从构建环境变量中注入
-const API_BASE = import.meta.env.VITE_API_BASE_URL || ''
+// 后端 API 基础地址，优先使用构建期环境变量，
+// 若未配置则在 binaryextract.xyh.wiki 下自动切换到 binaryextract-api.xyh.wiki，
+// 其他域名则默认使用当前页面所在域名。
+const API_BASE =
+    import.meta.env.VITE_API_BASE_URL ||
+    (typeof window !== 'undefined' && window.location.origin
+        ? (window.location.origin.includes('binaryextract.xyh.wiki')
+            ? window.location.origin.replace('binaryextract.xyh.wiki', 'binaryextract-api.xyh.wiki')
+            : window.location.origin)
+        : '')
 
 /**
  * Author:XYH
