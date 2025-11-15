@@ -1,0 +1,45 @@
+# Author:XYH Date:2025-11-15
+# Description: Spring Boot 后端多阶段构建 + 轻量级 JRE 运行（binary-text-backend）
+
+########################
+# 第 1 阶段：使用 Maven 编译多模块项目
+########################
+FROM maven:3.9-eclipse-temurin-8 AS builder
+
+WORKDIR /app
+
+# ================================
+# 1. 预拷贝 POM，利用 Maven 缓存
+# ================================
+COPY pom.xml ./pom.xml
+COPY extract-binary-text/pom.xml ./extract-binary-text/pom.xml
+COPY binary-text-backend/pom.xml ./binary-text-backend/pom.xml
+
+# 预拉取依赖，加速后续构建
+RUN mvn -pl binary-text-backend -am dependency:go-offline -DskipTests
+
+# ================================
+# 2. 拷贝全部后端源码并打包
+# ================================
+COPY extract-binary-text ./extract-binary-text
+COPY binary-text-backend ./binary-text-backend
+
+# 构建后端（会自动构建 extract-binary-text）
+RUN mvn -pl binary-text-backend -am clean package -DskipTests
+
+########################
+# 第 2 阶段：使用轻量 JRE 运行 Spring Boot
+########################
+FROM eclipse-temurin:8-jre
+
+WORKDIR /app
+
+# 从构建阶段复制 JAR
+COPY --from=builder /app/binary-text-backend/target/binary-text-backend-1.0.0.jar /app/app.jar
+
+# JVM 参数可从 Dokploy 注入
+ENV JAVA_OPTS=""
+
+EXPOSE 8080
+
+CMD ["sh", "-c", "java $JAVA_OPTS -jar /app/app.jar"]

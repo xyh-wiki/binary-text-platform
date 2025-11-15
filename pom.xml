@@ -11,8 +11,7 @@
 
     <modules>
         <module>extract-binary-text</module>
-        <module>binary-text-api</module>
-        <module>binary-text-frontend</module>
+        <module>binary-text-backend</module>
     </modules>
 
     <properties>
