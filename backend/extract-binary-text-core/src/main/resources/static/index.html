@@ -1,0 +1,984 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>二进制文件文本提取平台</title>
+    <link rel="stylesheet" href="libs/bootstrap.min.css">
+    <script src="libs/vue.min.js"></script>
+    <script src="libs/axios.min.js"></script>
+    <link rel="stylesheet" href="libs/remixicon.css">
+    <style>
+        /* 整体背景、字体 */
+        body {
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+            font-family: -apple-system, BlinkMacSystemFont, "SF Pro SC", "PingFang SC", "Helvetica Neue", Arial, "Microsoft YaHei", sans-serif;
+            background: radial-gradient(circle at top, #1f2937 0, #020617 50%, #000 100%);
+            color: #e5e7eb;
+        }
+
+        /* 顶部渐变条 */
+        .app-header-bar {
+            height: 4px;
+            background: linear-gradient(90deg, #3b82f6, #8b5cf6, #ec4899);
+        }
+
+        /* 外层容器，居中布局 */
+        .app-shell {
+            padding: 24px;
+        }
+
+        @media (min-width: 1200px) {
+            .app-shell {
+                padding: 32px 40px;
+            }
+        }
+
+        /* 顶部标题区域 */
+        .app-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 20px;
+        }
+
+        .app-title {
+            display: flex;
+            align-items: center;
+        }
+
+        .app-logo {
+            width: 40px;
+            height: 40px;
+            border-radius: 14px;
+            background: radial-gradient(circle at 30% 20%, #38bdf8, #4f46e5 50%, #0f172a 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 14px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, .45);
+        }
+
+        .app-logo i {
+            font-size: 22px;
+            color: #e5e7eb;
+        }
+
+        .app-title-main {
+            font-size: 20px;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            color: #f9fafb;
+        }
+
+        .app-title-sub {
+            font-size: 13px;
+            color: #9ca3af;
+            margin-top: 4px;
+        }
+
+        /* 顶部统计卡片 */
+        .stat-cards {
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            gap: 10px;
+        }
+
+        .stat-card {
+            min-width: 120px;
+            padding: 10px 12px;
+            border-radius: 14px;
+            background: linear-gradient(145deg, rgba(15, 23, 42, .95), rgba(15, 23, 42, .7));
+            border: 1px solid rgba(148, 163, 184, 0.35);
+            box-shadow: 0 18px 40px rgba(15, 23, 42, .75);
+        }
+
+        .stat-label {
+            font-size: 11px;
+            text-transform: uppercase;
+            color: #9ca3af;
+            letter-spacing: 0.08em;
+        }
+
+        .stat-value {
+            font-size: 20px;
+            font-weight: 600;
+            color: #e5e7eb;
+        }
+
+        .stat-badge {
+            font-size: 11px;
+            padding: 2px 7px;
+            border-radius: 999px;
+            background: rgba(55, 65, 81, .8);
+            color: #e5e7eb;
+        }
+
+        /* 主体两列布局 */
+        .app-main {
+            margin-top: 10px;
+        }
+
+        /* 通用卡片：玻璃拟态 */
+        .glass-card {
+            margin-bottom: 18px;
+            border-radius: 18px;
+            background: radial-gradient(circle at top left, rgba(148, 163, 184, 0.18), rgba(15, 23, 42, .95));
+            border: 1px solid rgba(148, 163, 184, 0.45);
+            box-shadow:
+                    0 18px 40px rgba(15, 23, 42, .85),
+                    0 0 0 1px rgba(15, 23, 42, .9) inset;
+            overflow: hidden;
+        }
+
+        .glass-card-header {
+            padding: 12px 16px 10px 16px;
+            border-bottom: 1px solid rgba(55, 65, 81, 0.9);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            backdrop-filter: blur(12px);
+        }
+
+        .glass-card-title {
+            display: flex;
+            align-items: center;
+            font-size: 14px;
+            font-weight: 500;
+            color: #e5e7eb;
+        }
+
+        .glass-card-title i {
+            font-size: 18px;
+            margin-right: 8px;
+            color: #38bdf8;
+        }
+
+        .glass-card-body {
+            padding: 14px 16px 16px 16px;
+        }
+
+        /* 左侧上传卡片 */
+        .upload-hint {
+            font-size: 12px;
+            color: #9ca3af;
+        }
+
+        .custom-file-input {
+            color: #e5e7eb;
+        }
+
+        .custom-file-input::-webkit-file-upload-button {
+            visibility: hidden;
+        }
+
+        .custom-file-input::before {
+            content: "选择文件";
+            display: inline-block;
+            background: linear-gradient(135deg, #2563eb, #4f46e5);
+            border-radius: 999px;
+            padding: 6px 14px;
+            outline: none;
+            white-space: nowrap;
+            -webkit-user-select: none;
+            cursor: pointer;
+            color: #f9fafb;
+            font-size: 13px;
+            font-weight: 500;
+            margin-right: 6px;
+        }
+
+        .custom-file-input:hover::before {
+            filter: brightness(1.07);
+        }
+
+        .custom-file-input:active::before {
+            filter: brightness(0.95);
+        }
+
+        .file-name-preview {
+            margin-top: 6px;
+            font-size: 12px;
+            color: #9ca3af;
+            word-break: break-all;
+        }
+
+        .form-control,
+        .form-control:focus,
+        .custom-select {
+            background-color: rgba(15, 23, 42, .9);
+            border-radius: 10px;
+            border-color: rgba(55, 65, 81, .9);
+            color: #e5e7eb;
+            box-shadow: none;
+        }
+
+        .form-control::placeholder {
+            color: #6b7280;
+        }
+
+        .btn-primary {
+            border-radius: 999px;
+            background: linear-gradient(135deg, #2563eb, #4f46e5);
+            border-color: transparent;
+            font-weight: 500;
+            letter-spacing: 0.02em;
+        }
+
+        .btn-primary:hover {
+            filter: brightness(1.06);
+        }
+
+        .btn-outline-secondary,
+        .btn-outline-primary {
+            border-radius: 999px;
+        }
+
+        /* 当前提取结果预览 */
+        pre {
+            white-space: pre-wrap;
+            word-break: break-all;
+            font-size: 12px;
+            line-height: 1.5;
+            background: rgba(15, 23, 42, .9);
+            border-radius: 12px;
+            padding: 10px 12px;
+            border: 1px solid rgba(31, 41, 55, .9);
+            color: #d1d5db;
+            /* 新增：统一给预览区一个最大高度和滚动条 */
+            max-height: 420px;
+            overflow: auto;
+        }
+
+        /* 截断模式：高度更小，且隐藏多余内容 */
+        .truncate-text {
+            max-height: 180px;
+            overflow: hidden;
+        }
+
+        .pill-badge {
+            border-radius: 999px;
+            padding: 2px 9px;
+            font-size: 11px;
+        }
+
+        .pill-badge-success {
+            background: rgba(16, 185, 129, .18);
+            color: #6ee7b7;
+            border: 1px solid rgba(16, 185, 129, .5);
+        }
+
+        .pill-badge-fail {
+            background: rgba(239, 68, 68, .16);
+            color: #fca5a5;
+            border: 1px solid rgba(239, 68, 68, .45);
+        }
+
+        .pill-tag {
+            border-radius: 999px;
+            background: rgba(31, 41, 55, .9);
+            padding: 2px 10px;
+            font-size: 11px;
+            color: #9ca3af;
+        }
+
+        .section-label {
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: #6b7280;
+        }
+
+        /* 右侧历史卡片 + 表格 */
+        .table {
+            margin-bottom: 0;
+            color: #d1d5db;
+            font-size: 13px;
+        }
+
+        .table thead {
+            background: rgba(15, 23, 42, .98);
+        }
+
+        .table thead th {
+            border-bottom-width: 1px;
+            border-color: rgba(55, 65, 81, .9);
+            font-weight: 500;
+            color: #9ca3af;
+        }
+
+        .table tbody tr {
+            background-color: rgba(15, 23, 42, .96);
+            border-color: rgba(31, 41, 55, .9);
+        }
+
+        .table tbody tr:hover {
+            background: radial-gradient(circle at left, rgba(59, 130, 246, .15), rgba(15, 23, 42, .98));
+        }
+
+        .table td, .table th {
+            border-color: rgba(31, 41, 55, .9);
+            vertical-align: middle;
+        }
+
+        .table-col-filename {
+            max-width: 260px;
+        }
+
+        .table-col-filename span {
+            display: inline-block;
+            max-width: 100%;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .pointer {
+            cursor: pointer;
+        }
+
+        .card-footer {
+            background: rgba(15, 23, 42, .9);
+            border-top: 1px solid rgba(31, 41, 55, .9);
+            color: #9ca3af;
+        }
+
+        /* 自定义 modal（不依赖 Bootstrap JS） */
+        .custom-modal-backdrop {
+            position: fixed;
+            inset: 0;
+            background: rgba(15, 23, 42, 0.75);
+            backdrop-filter: blur(4px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1050;
+        }
+
+        .custom-modal {
+            width: 96%;
+            max-width: 980px;
+            max-height: 85vh;
+            border-radius: 18px;
+            background: radial-gradient(circle at top left, rgba(148, 163, 184, 0.18), rgba(15, 23, 42, .98));
+            border: 1px solid rgba(148, 163, 184, 0.5);
+            box-shadow: 0 26px 70px rgba(0, 0, 0, .85);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .custom-modal-header {
+            padding: 14px 18px 10px 18px;
+            border-bottom: 1px solid rgba(31, 41, 55, .95);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .custom-modal-title {
+            font-size: 14px;
+            font-weight: 500;
+            color: #e5e7eb;
+            display: flex;
+            align-items: center;
+        }
+
+        .custom-modal-title i {
+            font-size: 18px;
+            margin-right: 8px;
+            color: #38bdf8;
+        }
+
+        .custom-modal-body {
+            padding: 12px 18px 14px 18px;
+            overflow: auto;
+        }
+
+        .custom-modal-footer {
+            padding: 10px 18px 12px 18px;
+            border-top: 1px solid rgba(31, 41, 55, .95);
+            display: flex;
+            justify-content: flex-end;
+        }
+
+        .close {
+            color: #9ca3af;
+            text-shadow: none;
+        }
+
+        .close:hover {
+            color: #e5e7eb;
+        }
+
+        /* 小屏适配 */
+        @media (max-width: 991.98px) {
+            .app-header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .stat-cards {
+                width: 100%;
+                justify-content: flex-start;
+                margin-top: 12px;
+                flex-wrap: wrap;
+            }
+        }
+    </style>
+</head>
+<body>
+<div id="app">
+    <!-- 顶部彩色进度条 -->
+    <div class="app-header-bar"></div>
+
+    <div class="app-shell container-fluid">
+        <!-- 顶部标题 + 统计 -->
+        <div class="app-header">
+            <div class="app-title">
+                <div class="app-logo">
+                    <i class="ri-file-text-line"></i>
+                </div>
+                <div>
+                    <div class="app-title-main">二进制文件文本提取平台</div>
+                    <div class="app-title-sub">
+                        基于后端 GetTypeAndContent 能力，统一完成文件类型识别与纯文本提取，并支持历史日志检索。
+                    </div>
+                </div>
+            </div>
+
+            <div class="stat-cards">
+                <div class="stat-card">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div class="stat-label">TODAY</div>
+                        <span class="stat-badge">
+                            <i class="ri-calendar-line mr-1"></i> 今日
+                        </span>
+                    </div>
+                    <div class="stat-value">{{ stats.todayCount }}</div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div class="stat-label">FAILED</div>
+                        <span class="stat-badge" style="background: rgba(185, 28, 28, .45); color: #fecaca;">
+                            <i class="ri-error-warning-line mr-1"></i> 失败
+                        </span>
+                    </div>
+                    <div class="stat-value" style="color:#fecaca;">{{ stats.todayFailed }}</div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div class="stat-label">TOTAL</div>
+                        <span class="stat-badge" style="background: rgba(22, 163, 74, .6); color:#dcfce7;">
+                            <i class="ri-database-2-line mr-1"></i> 历史
+                        </span>
+                    </div>
+                    <div class="stat-value">{{ stats.total }}</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 主体区域 -->
+        <div class="app-main row">
+            <!-- 左侧：上传 & 当前结果 -->
+            <div class="col-lg-4 mb-3">
+                <!-- 上传卡片 -->
+                <div class="glass-card">
+                    <div class="glass-card-header">
+                        <div class="glass-card-title">
+                            <i class="ri-upload-cloud-2-line"></i>
+                            文件上传与提取
+                        </div>
+                        <span class="pill-tag">
+                            <i class="ri-lightbulb-flash-line mr-1"></i> 支持 PDF / OFD / Word / Excel / HTML / TXT
+                        </span>
+                    </div>
+                    <div class="glass-card-body">
+                        <div class="form-group mb-3">
+                            <div class="section-label mb-1">SOURCE FILE</div>
+                            <input type="file"
+                                   class="custom-file-input"
+                                   @change="onFileChange">
+                            <div class="file-name-preview" v-if="selectedFile">
+                                <i class="ri-file-3-line mr-1"></i>
+                                已选择：{{ selectedFile.name }}
+                            </div>
+                            <div class="upload-hint mt-1">
+                                仅支持单文件上传；后端统一通过 <code>GetTypeAndContent</code> 自动判断文件类型并提取纯文本。
+                            </div>
+                        </div>
+
+                        <div class="form-group mb-3">
+                            <div class="section-label mb-1">MODE</div>
+                            <select class="form-control custom-select" v-model="form.mode">
+                                <option value="TYPE_AND_CONTENT">识别文件类型 + 提取文本内容</option>
+                                <option value="TYPE_ONLY">仅识别文件类型（不返回文本）</option>
+                                <option value="CONTENT_ONLY">仅提取文本内容（仍返回类型字段）</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group mb-3">
+                            <div class="section-label mb-1">TAG</div>
+                            <input type="text"
+                                   class="form-control"
+                                   v-model="form.remark"
+                                   placeholder="例如：案件号 / 任务批次 / 业务标识">
+                            <small class="upload-hint">
+                                备注信息会一并写入历史记录，方便按案件号或任务批次进行检索。
+                            </small>
+                        </div>
+
+                        <button class="btn btn-primary btn-block"
+                                :disabled="!selectedFile || loading"
+                                @click="doExtract">
+                            <span v-if="loading" class="spinner-border spinner-border-sm mr-1"></span>
+                            <i class="ri-flashlight-line mr-1"></i> 开始提取
+                        </button>
+                    </div>
+                </div>
+
+                <!-- 当前提取结果卡片 -->
+                <div class="glass-card" v-if="currentResult">
+                    <div class="glass-card-header">
+                        <div class="glass-card-title">
+                            <i class="ri-file-search-line"></i>
+                            当前提取结果
+                        </div>
+                        <span v-if="currentResult.success"
+                              class="pill-badge pill-badge-success">
+                            <i class="ri-checkbox-circle-line mr-1"></i> 成功
+                        </span>
+                        <span v-else
+                              class="pill-badge pill-badge-fail">
+                            <i class="ri-close-circle-line mr-1"></i> 失败
+                        </span>
+                    </div>
+                    <div class="glass-card-body">
+                        <div class="mb-1">
+                            <span class="section-label">BASIC</span>
+                        </div>
+                        <p class="mb-1">
+                            <strong>文件名：</strong>{{ currentResult.fileName }}
+                        </p>
+                        <p class="mb-1">
+                            <strong>文件大小：</strong>{{ formatSize(currentResult.fileSize) }}
+                        </p>
+                        <p class="mb-1">
+                            <strong>识别类型：</strong>
+                            <span class="pill-tag">
+                                <i class="ri-price-tag-3-line mr-1"></i>{{ currentResult.fileType || '-' }}
+                            </span>
+                        </p>
+                        <p class="mb-2" v-if="currentResult.remark">
+                            <strong>备注：</strong>{{ currentResult.remark }}
+                        </p>
+                        <p v-if="!currentResult.success" class="mb-2" style="color:#fecaca;">
+                            <strong>错误信息：</strong>{{ currentResult.errorMessage }}
+                        </p>
+
+                        <div v-if="currentResult.content">
+                            <div class="d-flex justify-content-between align-items-center mb-1">
+                                <span class="section-label">CONTENT PREVIEW</span>
+                                <button class="btn btn-sm btn-outline-secondary"
+                                        @click="copyText(currentResult.content)">
+                                    <i class="ri-file-copy-line mr-1"></i> 复制全部文本
+                                </button>
+                            </div>
+                            <pre :class="{'truncate-text': !showFullPreview}">
+{{ previewText(currentResult.content) }}
+                            </pre>
+                            <div v-if="currentResult.content.length > previewLimit" class="mt-1">
+                                <a href="javascript:void(0);"
+                                   @click="showFullPreview = !showFullPreview">
+                                    {{ showFullPreview ? '收起预览' : '展开全部' }}
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 右侧：历史检索 & 列表 -->
+            <div class="col-lg-8 mb-3">
+                <!-- 查询条件 -->
+                <div class="glass-card mb-3">
+                    <div class="glass-card-header">
+                        <div class="glass-card-title">
+                            <i class="ri-filter-3-line"></i>
+                            历史提取记录查询
+                        </div>
+                        <span class="pill-tag">
+                            <i class="ri-search-line mr-1"></i> 支持按文件名 / 类型 / 状态 / 日期过滤
+                        </span>
+                    </div>
+                    <div class="glass-card-body">
+                        <form class="form-row">
+                            <div class="form-group col-md-3">
+                                <label class="section-label d-block mb-1">文件名</label>
+                                <input type="text"
+                                       class="form-control"
+                                       v-model="query.fileNameLike"
+                                       placeholder="支持模糊匹配">
+                            </div>
+                            <div class="form-group col-md-2">
+                                <label class="section-label d-block mb-1">文件类型</label>
+                                <select class="form-control custom-select" v-model="query.fileType">
+                                    <option value="">全部</option>
+                                    <option v-for="t in fileTypes" :key="t" :value="t">{{ t }}</option>
+                                </select>
+                            </div>
+                            <div class="form-group col-md-2">
+                                <label class="section-label d-block mb-1">状态</label>
+                                <select class="form-control custom-select" v-model="query.success">
+                                    <option value="">全部</option>
+                                    <option value="true">成功</option>
+                                    <option value="false">失败</option>
+                                </select>
+                            </div>
+                            <div class="form-group col-md-2">
+                                <label class="section-label d-block mb-1">开始日期</label>
+                                <input type="date"
+                                       class="form-control"
+                                       v-model="query.startDate">
+                            </div>
+                            <div class="form-group col-md-2">
+                                <label class="section-label d-block mb-1">结束日期</label>
+                                <input type="date"
+                                       class="form-control"
+                                       v-model="query.endDate">
+                            </div>
+                            <div class="form-group col-md-1 d-flex align-items-end">
+                                <button type="button"
+                                        class="btn btn-primary btn-block"
+                                        @click="loadHistory(1)">
+                                    <i class="ri-search-eye-line"></i>
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- 历史记录表格 -->
+                <div class="glass-card">
+                    <div class="glass-card-header">
+                        <div class="glass-card-title">
+                            <i class="ri-history-line"></i>
+                            历史记录列表
+                        </div>
+                        <div class="d-flex align-items-center">
+                            <span class="section-label mr-2">每页条数</span>
+                            <select v-model.number="pageSize"
+                                    class="form-control form-control-sm custom-select"
+                                    style="width: 90px"
+                                    @change="loadHistory(1)">
+                                <option :value="10">10 / 页</option>
+                                <option :value="20">20 / 页</option>
+                                <option :value="50">50 / 页</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="glass-card-body p-0">
+                        <table class="table table-hover table-borderless mb-0">
+                            <thead>
+                            <tr>
+                                <th style="width: 170px;">提取时间</th>
+                                <th class="table-col-filename">文件名</th>
+                                <th style="width: 110px;">文件类型</th>
+                                <th style="width: 90px;">大小</th>
+                                <th style="width: 90px;">状态</th>
+                                <th style="width: 120px;">操作</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr v-for="item in historyList" :key="item.id">
+                                <td>{{ item.createTime }}</td>
+                                <td class="table-col-filename">
+                                    <span :title="item.fileName" class="pointer">
+                                        {{ item.fileName }}
+                                    </span>
+                                </td>
+                                <td>
+                                    <span class="pill-tag">
+                                        {{ item.fileType || '-' }}
+                                    </span>
+                                </td>
+                                <td>{{ formatSize(item.fileSize) }}</td>
+                                <td>
+                                    <span v-if="item.success"
+                                          class="pill-badge pill-badge-success">
+                                        成功
+                                    </span>
+                                    <span v-else
+                                          class="pill-badge pill-badge-fail">
+                                        失败
+                                    </span>
+                                </td>
+                                <td>
+                                    <button class="btn btn-sm btn-outline-primary mr-1"
+                                            @click="viewDetail(item.id)">
+                                        <i class="ri-eye-line mr-1"></i> 详情
+                                    </button>
+                                </td>
+                            </tr>
+                            <tr v-if="historyList.length === 0">
+                                <td colspan="6" class="text-center py-3" style="color:#6b7280;">
+                                    暂无记录，可先在左侧上传文件进行提取。
+                                </td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="card-footer d-flex justify-content-between align-items-center">
+                        <span>
+                            共 {{ total }} 条记录，
+                            当前第 <strong>{{ pageNum }}</strong> / {{ totalPages }} 页
+                        </span>
+                        <div>
+                            <button class="btn btn-sm btn-outline-secondary mr-1"
+                                    :disabled="pageNum <= 1"
+                                    @click="loadHistory(pageNum - 1)">
+                                <i class="ri-arrow-left-line mr-1"></i> 上一页
+                            </button>
+                            <button class="btn btn-sm btn-outline-secondary"
+                                    :disabled="pageNum >= totalPages"
+                                    @click="loadHistory(pageNum + 1)">
+                                下一页 <i class="ri-arrow-right-line ml-1"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 详情弹窗 -->
+        <div class="custom-modal-backdrop" v-if="detailVisible">
+            <div class="custom-modal">
+                <div class="custom-modal-header">
+                    <div class="custom-modal-title">
+                        <i class="ri-article-line"></i>
+                        提取详情 - {{ detail.fileName }}
+                    </div>
+                    <button type="button" class="close" @click="detailVisible = false">
+                        <span>&times;</span>
+                    </button>
+                </div>
+                <div class="custom-modal-body">
+                    <div class="mb-2">
+                        <span class="section-label">基础信息</span>
+                    </div>
+                    <p class="mb-1"><strong>提取时间：</strong>{{ detail.createTime }}</p>
+                    <p class="mb-1"><strong>文件名：</strong>{{ detail.fileName }}</p>
+                    <p class="mb-1"><strong>文件大小：</strong>{{ formatSize(detail.fileSize) }}</p>
+                    <p class="mb-1">
+                        <strong>识别类型：</strong>
+                        <span class="pill-tag">{{ detail.fileType || '-' }}</span>
+                    </p>
+                    <p class="mb-2" v-if="detail.remark"><strong>备注：</strong>{{ detail.remark }}</p>
+                    <p v-if="!detail.success" class="mb-2" style="color:#fecaca;">
+                        <strong>错误信息：</strong>{{ detail.errorMessage }}
+                    </p>
+
+                    <div v-if="detail.content">
+                        <div class="d-flex justify-content-between align-items-center mb-1 mt-3">
+                            <span class="section-label">提取文本内容</span>
+                            <button class="btn btn-sm btn-outline-secondary"
+                                    @click="copyText(detail.content)">
+                                <i class="ri-file-copy-line mr-1"></i> 复制全部文本
+                            </button>
+                        </div>
+                        <pre style="max-height: 420px; overflow:auto;">
+{{ detail.content }}
+                        </pre>
+                    </div>
+                </div>
+                <div class="custom-modal-footer">
+                    <button type="button"
+                            class="btn btn-secondary btn-sm"
+                            @click="detailVisible = false">
+                        关闭
+                    </button>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<script>
+    new Vue({
+        el: '#app',
+        data: {
+            // 上传表单
+            form: {
+                mode: 'TYPE_AND_CONTENT',
+                remark: ''
+            },
+            selectedFile: null,
+            loading: false,
+
+            // 当前一次的提取结果
+            currentResult: null,
+            showFullPreview: false,
+            previewLimit: 3000,
+
+            // 历史查询条件
+            query: {
+                fileNameLike: '',
+                fileType: '',
+                success: '',
+                startDate: '',
+                endDate: ''
+            },
+            fileTypes: ['PDF', 'OFD', 'WORD', 'EXCEL', 'HTML', 'TXT', 'IMAGE', 'UNKNOWN'],
+
+            // 历史列表分页
+            historyList: [],
+            pageNum: 1,
+            pageSize: 10,
+            total: 0,
+
+            // 统计信息
+            stats: {
+                todayCount: 0,
+                todayFailed: 0,
+                total: 0
+            },
+
+            // 详情弹窗
+            detailVisible: false,
+            detail: {},
+
+            // 后端接口基础路径，可按需修改
+            baseUrl: ''
+        },
+        computed: {
+            totalPages() {
+                if (this.total === 0) return 1;
+                return Math.ceil(this.total / this.pageSize);
+            }
+        },
+        created() {
+            this.loadHistory(1);
+            this.loadStats();
+        },
+        methods: {
+            onFileChange(e) {
+                const files = e.target.files;
+                if (files && files.length > 0) {
+                    this.selectedFile = files[0];
+                } else {
+                    this.selectedFile = null;
+                }
+            },
+            // 发起提取请求
+            doExtract() {
+                if (!this.selectedFile) return;
+                this.loading = true;
+                this.showFullPreview = false;
+
+                const formData = new FormData();
+                formData.append('file', this.selectedFile);
+                formData.append('mode', this.form.mode);
+                formData.append('remark', this.form.remark || '');
+
+                axios.post(this.baseUrl + '/api/extract', formData, {
+                    headers: {'Content-Type': 'multipart/form-data'}
+                }).then(res => {
+                    this.currentResult = res.data;
+                    // 提取成功后刷新历史列表和统计
+                    this.loadHistory(1);
+                    this.loadStats();
+                }).catch(err => {
+                    console.error(err);
+                    this.currentResult = {
+                        success: false,
+                        fileName: this.selectedFile.name,
+                        fileSize: this.selectedFile.size,
+                        fileType: null,
+                        content: null,
+                        errorMessage: err.response && err.response.data ? err.response.data : err.message
+                    };
+                }).finally(() => {
+                    this.loading = false;
+                });
+            },
+            // 加载历史列表
+            loadHistory(page) {
+                if (page < 1) page = 1;
+                this.pageNum = page;
+
+                const params = {
+                    pageNum: this.pageNum,
+                    pageSize: this.pageSize,
+                    fileNameLike: this.query.fileNameLike || '',
+                    fileType: this.query.fileType || '',
+                    success: this.query.success === '' ? null : this.query.success === 'true',
+                    startDate: this.query.startDate || '',
+                    endDate: this.query.endDate || ''
+                };
+
+                axios.get(this.baseUrl + '/api/history', {params})
+                    .then(res => {
+                        this.historyList = res.data.records || [];
+                        this.total = res.data.total || 0;
+                    }).catch(err => {
+                    console.error(err);
+                });
+            },
+            // 加载统计信息
+            loadStats() {
+                axios.get(this.baseUrl + '/api/history/stats')
+                    .then(res => {
+                        this.stats = res.data || this.stats;
+                    }).catch(err => {
+                    console.error(err);
+                });
+            },
+            // 查看详情
+            viewDetail(id) {
+                axios.get(this.baseUrl + '/api/history/' + id)
+                    .then(res => {
+                        this.detail = res.data;
+                        this.detailVisible = true;
+                    }).catch(err => {
+                    console.error(err);
+                });
+            },
+            // 复制文本到剪贴板
+            copyText(text) {
+                if (!text) return;
+                const textarea = document.createElement('textarea');
+                textarea.value = text;
+                document.body.appendChild(textarea);
+                textarea.select();
+                try {
+                    document.execCommand('copy');
+                    alert('已复制到剪贴板');
+                } catch (e) {
+                    alert('复制失败，请手动选择复制');
+                }
+                document.body.removeChild(textarea);
+            },
+            // 文件大小格式化
+            formatSize(size) {
+                if (size === null || size === undefined) return '-';
+                if (size < 1024) return size + ' B';
+                if (size < 1024 * 1024) return (size / 1024).toFixed(1) + ' KB';
+                return (size / 1024 / 1024).toFixed(2) + ' MB';
+            },
+            // 预览文本（前 previewLimit 个字符）
+            previewText(text) {
+                if (!text) return '';
+                if (this.showFullPreview || text.length <= this.previewLimit) {
+                    return text;
+                }
+                return text.substr(0, this.previewLimit) + '\n...\n（仅展示前 ' + this.previewLimit + ' 字，点击“展开全部”查看完整内容）';
+            }
+        }
+    });
+</script>
+</body>
+</html>

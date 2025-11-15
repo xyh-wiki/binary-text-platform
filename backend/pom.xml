@@ -10,8 +10,8 @@
     <packaging>pom</packaging>
 
     <modules>
-        <module>extract-binary-text</module>
-        <module>backend</module>
+        <module>extract-binary-text-core</module>
+        <module>binary-text-backend</module>
     </modules>
 
     <properties>

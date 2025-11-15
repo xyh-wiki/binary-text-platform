@@ -1,0 +1,12 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: binary-text-backend
+
+# 根据需要可在此处继续扩展日志级别、文件上传大小限制等配置
+  servlet:
+    multipart:
+      max-file-size: 50MB
+      max-request-size: 50MB
