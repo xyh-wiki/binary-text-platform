@@ -100,9 +100,14 @@ const App = () => {
                             method: 'POST',
                             body: formData,
                         })
+                        // 增加这段
+                        if (!resp.ok) {
+                            throw new Error(`HTTP ${resp.status}`)
+                        }
+
                         const data: ExtractResult = await resp.json()
                         updateTask(next.id, { status: 'success', result: data })
-                    } catch (e) {
+                    } catch (e: any) {
                         console.error(e)
                         updateTask(next.id, { status: 'error' })
                     }
@@ -177,7 +182,7 @@ const App = () => {
 
     return (
 
-        // 外层
+        // 外层容器
         <div
             style={{
                 minHeight: '100vh',
@@ -187,14 +192,18 @@ const App = () => {
                 background: '#0f172a',
                 color: '#e5e7eb',
                 padding: '40px 16px',
+                display: 'flex',            // 重新用 flex 居中
+                justifyContent: 'center',   // 水平居中
+                alignItems: 'flex-start',   // 顶部对齐
                 width: '100%',
             }}
         >
-
+            // 内层主体功能框
             <div
                 style={{
                     width: '100%',
-                    maxWidth: '100%',
+                    maxWidth: 1200,              // 最大宽度 1200px，左右不会超屏
+                    minHeight: '66vh',           // 高度至少 2/3 屏幕
                     background: '#020617',
                     borderRadius: 24,
                     boxShadow: '0 24px 60px rgba(15,23,42,0.8)',
