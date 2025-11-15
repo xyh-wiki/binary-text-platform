@@ -1,11 +1,10 @@
-package wiki.xyh.api.controller;
+package main.java.wiki.xyh.controller;
 
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-import wiki.xyh.api.dto.ExtractResultDTO;
-import wiki.xyh.bean.TypeAndContent;
+import wiki.xyh.TypeAndContent;
+import wiki.xyh.dto.ExtractResultDTO;
 import wiki.xyh.utils.GetTypeAndContent;
 
 import java.util.ArrayList;

@@ -1,17 +1,11 @@
 package wiki.xyh.jobs;
 
-import org.apache.commons.io.FileUtils;
-import org.ofdrw.converter.PdfboxMaker;
-import wiki.xyh.bean.TypeAndContent;
-import wiki.xyh.utils.EncodeUtils;
-import wiki.xyh.utils.FileTypeDetector;
-import wiki.xyh.utils.GetTypeAndContent;
-import wiki.xyh.utils.PDFWatermarkRemover;
 
-import java.io.BufferedInputStream;
+import org.apache.commons.io.FileUtils;
+import wiki.xyh.bean.TypeAndContent;
+import wiki.xyh.utils.GetTypeAndContent;
+
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.LogManager;
 import java.util.logging.Logger;

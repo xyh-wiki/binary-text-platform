@@ -1,4 +1,4 @@
-package wiki.xyh.api.dto;
+package main.java.wiki.xyh.dto;
 
 /**
  * Author:XYH

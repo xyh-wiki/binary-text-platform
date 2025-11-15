@@ -1,12 +1,10 @@
-/**
+package wiki.xyh.utils; /**
  * @Author: XYH
  * @Date: 2025-07-21
  * @Description: 使用文件魔数判断字节内容是否为图片，替代 Apache Tika，性能更优。
  */
 
-package wiki.xyh.utils;
 
-import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FileUtils;
 
 import java.io.File;
