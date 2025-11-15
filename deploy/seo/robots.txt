@@ -1,5 +1,4 @@
 User-agent: *
 Allow: /
-Sitemap: https://ocr.xyh.wiki/sitemap.xml
-Host: ocr.xyh.wiki
-Crawl-delay: 1
+
+Sitemap: https://binaryextract.xyh.wiki/sitemap.xml
