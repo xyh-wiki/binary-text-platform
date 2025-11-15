@@ -172,18 +172,25 @@
         </dependency>
 
     </dependencies>
-
     <build>
         <plugins>
-            <!-- Spring Boot 打包插件，生成可执行 fat-jar，供 Dokploy 直接运行 -->
+            <!-- ✅ Spring Boot 打包插件：生成可执行 fat-jar -->
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
                 <version>2.7.18</version>
                 <configuration>
-                    <!-- 启动类：根据你项目里的包名调整，如果是 wiki.xyh.BinaryTextApiApplication 就这样写 -->
+                    <!-- 这里写你的启动类全限定名 -->
                     <mainClass>wiki.xyh.BinaryTextApiApplication</mainClass>
                 </configuration>
+                <executions>
+                    <execution>
+                        <goals>
+                            <!-- 关键：repackage 会把普通 jar 重新打成可执行 boot jar -->
+                            <goal>repackage</goal>
+                        </goals>
+                    </execution>
+                </executions>
             </plugin>
         </plugins>
     </build>
