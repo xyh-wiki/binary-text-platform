@@ -24,7 +24,7 @@
         <!-- 复用原有提取模块，版本号需与 extract-binary-text/pom.xml 中保持一致 -->
         <dependency>
             <groupId>wiki.xyh</groupId>
-            <artifactId>extract-binary-text</artifactId>
+            <artifactId>extract-binary-text-core</artifactId>
             <version>1.0</version>
         </dependency>
 
