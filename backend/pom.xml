@@ -9,13 +9,6 @@
                              http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <!-- 可选：继承根工程 binary-text-platform 的通用配置 -->
-    <parent>
-        <groupId>wiki.xyh</groupId>
-        <artifactId>binary-text-platform</artifactId>
-        <version>1.0.0</version>
-        <relativePath>../pom.xml</relativePath>
-    </parent>
 
     <groupId>wiki.xyh</groupId>
     <artifactId>backend</artifactId>
@@ -29,7 +22,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
         <lombok.version>1.18.24</lombok.version>
-        <jsoup.version>1.14.2</jsoup.version>
+        <jsoup.version>1.15.3</jsoup.version>
         <poi.version>4.1.2</poi.version>
         <tika.version>2.4.1</tika.version>
         <pdfbox.version>3.0.3</pdfbox.version>
