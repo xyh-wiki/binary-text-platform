@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Author: XYH
+  Date: 2025-07-16
+  Description: Log4j2 配置文件，将日志输出到控制台，并设置各个包的日志级别
+-->
+<Configuration status="INFO" monitorInterval="30">
+    <Appenders>
+        <!-- 控制台输出 -->
+        <Console name="Console" target="SYSTEM_OUT">
+            <PatternLayout pattern="%d{yyyy-MM-dd HH:mm:ss} [%p] %c - %m%n"/>
+        </Console>
+    </Appenders>
+
+    <Loggers>
+        <!-- 设置项目包 com.cjbdi 的日志级别 -->
+        <Logger name="com.cjbdi" level="info" additivity="false">
+            <AppenderRef ref="Console"/>
+        </Logger>
+
+        <!-- 降低外部依赖包的日志级别，减少输出 -->
+        <Logger name="org.apache.zookeeper" level="off" additivity="false"/>
+        <Logger name="org.apache.hadoop" level="error" additivity="false"/>
+        <Logger name="org.apache.hbase" level="error" additivity="false"/>
+        <Logger name="org.springframework" level="warn" additivity="false"/>
+        <Logger name="org.apache.pdfbox" level="off" additivity="false"/>
+        <Logger name="com.gargoylesoftware.htmlunit" level="error" additivity="false"/>
+        <Logger name="org.apache.fontbox" level="off" additivity="false"/>
+        <Logger name="com.itextpdf" level="off" additivity="false"/>
+
+        <!-- 默认根日志设置 -->
+        <Root level="info">
+            <AppenderRef ref="Console"/>
+        </Root>
+    </Loggers>
+</Configuration>
