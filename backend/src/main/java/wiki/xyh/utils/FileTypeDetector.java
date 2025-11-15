@@ -46,7 +46,7 @@ public class FileTypeDetector {
             if (compareMagicNumber(headerBytes, PDF_MAGIC_NUMBER)) return FileType.PDF;
             if (compareMagicNumber(headerBytes, XLS_MAGIC_NUMBER)) return FileType.XLS;
             if (compareMagicNumber(headerBytes, XLSX_MAGIC_NUMBER)) return detectZipBasedType(bytes);
-            if (main.java.wiki.xyh.utils.JudgeImage.isImage(bytes)) return FileType.JPEG;
+            if (JudgeImage.isImage(bytes)) return FileType.JPEG;
 
         } catch (Exception e) {
             // 可以添加日志
