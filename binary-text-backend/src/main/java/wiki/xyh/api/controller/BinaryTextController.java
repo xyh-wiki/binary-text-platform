@@ -51,7 +51,7 @@ public class BinaryTextController {
             produces = MediaType.APPLICATION_JSON_VALUE
     )
     public ResponseEntity<List<ExtractResultDTO>> extractBatch(@RequestPart("files") MultipartFile[] files) {
-        List<ExtractResultDTO> list = new ArrayList<>();
+        List<ExtractResultDTO> list = new ArrayList<ExtractResultDTO>();
         if (files != null) {
             for (MultipartFile file : files) {
                 list.add(handleFile(file));
