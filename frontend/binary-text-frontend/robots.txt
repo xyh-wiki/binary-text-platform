@@ -1,4 +1,0 @@
-User-agent: *
-Allow: /
-
-Sitemap: https://binaryextract.xyh.wiki/sitemap.xml
